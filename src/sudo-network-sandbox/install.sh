@@ -20,7 +20,10 @@ if [ $# -ne 0 ]; then
     exit 1
 fi
 
-wait_for_dnsmasq_dns() {
+# Update container's resolv.conf to use local dnsmasq
+echo "nameserver 127.0.0.1" > /etc/resolv.conf
+
+wait_for_dnsmasq() {
     local timeout=10
     local count=0
 
@@ -53,11 +56,7 @@ if ! wait_for_dnsmasq; then
     exit 1
 fi
 
-# Wait for dnsmasq to start
-sleep 2
 
-# Update container's resolv.conf to use local dnsmasq
-echo "nameserver 127.0.0.1" > /etc/resolv.conf
 
 # 1. Extract Docker DNS info BEFORE any flushing
 DOCKER_DNS_RULES=$(iptables-save -t nat | grep "127\.0\.0\.11" || true)
