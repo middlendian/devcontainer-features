@@ -20,8 +20,38 @@ if [ $# -ne 0 ]; then
     exit 1
 fi
 
-# Start dnsmasq in background
-dnsmasq
+wait_for_dnsmasq_dns() {
+    local timeout=10
+    local count=0
+
+    echo "Waiting for dnsmasq DNS to be functional..."
+
+    while [ $count -lt $timeout ]; do
+        # Try to resolve a test domain through dnsmasq
+        if dig @127.0.0.1 +time=1 +tries=1 captive.apple.com > /dev/null 2>&1; then
+            echo "✓ dnsmasq DNS is functional"
+            return 0
+        fi
+
+        sleep 0.5
+        count=$((count + 1))
+    done
+
+    echo "✗ Timeout waiting for dnsmasq DNS"
+    return 1
+}
+
+# Start dnsmasq
+dnsmasq || {
+    echo "Failed to start dnsmasq"
+    exit 1
+}
+
+# Wait for it to be ready
+if ! wait_for_dnsmasq; then
+    echo "Aborting due to dnsmasq failure"
+    exit 1
+fi
 
 # Wait for dnsmasq to start
 sleep 2
