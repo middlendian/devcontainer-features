@@ -1,4 +1,4 @@
-name: "Build and validate dev container features"
+name: "Build"
 on:
   pull_request:
 
@@ -68,7 +68,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        features: ${{ fromJson(needs.prepare.outputs.features) }}
+        features: ${{ fromJson(needs.get-features.outputs.features) }}
         baseImage:
           - debian:latest
           - ubuntu:latest
@@ -90,7 +90,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        features: ${{ fromJson(needs.prepare.outputs.features) }}
+        features: ${{ fromJson(needs.get-features.outputs.features) }}
     steps:
       - uses: actions/checkout@v4
 
