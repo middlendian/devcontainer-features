@@ -70,11 +70,8 @@ jobs:
       matrix:
         features: ${{ fromJson(needs.get-features.outputs.features) }}
         baseImage:
-          - debian:latest
-          - ubuntu:latest
           - mcr.microsoft.com/devcontainers/base:ubuntu
           - mcr.microsoft.com/devcontainers/base:debian
-          - mcr.microsoft.com/devcontainers/base:trixie
     steps:
       - uses: actions/checkout@v4
 
