@@ -9,6 +9,6 @@ source dev-container-features-test-lib
 
 check "captive.apple.com is reachable" curl -s -f -o /dev/null --max-time 10 --connect-timeout 5 https://captive.apple.com
 check "httpbin.org is reachable" curl -s -f -o /dev/null --max-time 10 --connect-timeout 5 https://httpbin.org
-check "example.com is unreachable" curl -s -f -o /dev/null --max-time 10 --connect-timeout 5 https://example.com || echo "PASS" | grep "PASS"
+check "example.com is unreachable" bash -c "! curl -s -f -o /dev/null --max-time 10 --connect-timeout 5 https://example.com"
 
 reportResults
