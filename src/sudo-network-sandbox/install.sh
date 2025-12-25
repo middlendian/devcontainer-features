@@ -24,7 +24,7 @@ fi
 echo "nameserver 127.0.0.1" > /etc/resolv.conf
 
 wait_for_dnsmasq() {
-    local timeout=10
+    local timeout=20
     local count=0
 
     echo "Waiting for dnsmasq DNS to be functional..."
@@ -36,25 +36,13 @@ wait_for_dnsmasq() {
             return 0
         fi
 
-        sleep 0.5
+        sleep 1
         count=$((count + 1))
     done
 
     echo "✗ Timeout waiting for dnsmasq DNS"
     return 1
 }
-
-# Start dnsmasq
-dnsmasq || {
-    echo "Failed to start dnsmasq"
-    exit 1
-}
-
-# Wait for it to be ready
-if ! wait_for_dnsmasq; then
-    echo "Aborting due to dnsmasq failure"
-    exit 1
-fi
 
 
 
@@ -68,10 +56,9 @@ iptables -t nat -F
 iptables -t nat -X
 iptables -t mangle -F
 iptables -t mangle -X
-#ipset destroy allowed-domains 2>/dev/null || true
+ipset destroy allowed-domains 2>/dev/null || true
 
 ipset create allowed-domains hash:ip -exist
-#dnsmasq
 
 # 2. Selectively restore ONLY internal Docker DNS resolution
 if [ -n "$DOCKER_DNS_RULES" ]; then
@@ -125,6 +112,18 @@ iptables -A OUTPUT -m set --match-set allowed-domains dst -j ACCEPT
 # Explicitly REJECT all other outbound traffic for immediate feedback
 iptables -A OUTPUT -j REJECT --reject-with icmp-admin-prohibited
 
+
+# Start dnsmasq
+dnsmasq || {
+    echo "Failed to start dnsmasq"
+    exit 1
+}
+
+# Wait for it to be ready
+if ! wait_for_dnsmasq; then
+    echo "Aborting due to dnsmasq failure"
+    exit 1
+fi
 
 echo "Firewall configuration complete"
 echo "Verifying firewall rules..."
