@@ -41,7 +41,8 @@ source dev-container-features-test-lib
 # The 'check' command comes from the dev-container-features-test-lib. Syntax is...
 # check <LABEL> <cmd> [args...]
 check "captive.apple.com is reachable" curl -s -f -o /dev/null --max-time 10 --connect-timeout 5 https://captive.apple.com
-check "example.com is unreachable" curl -s -f -o /dev/null --max-time 10 --connect-timeout 5 https://example.com || echo "pass" | grep "pass"
+check "example.com is unreachable" bash -c "! curl -s -f -o /dev/null --max-time 10 --connect-timeout 5 https://example.com"
+check "sudo iptables" bash -c "! sudo iptables -t nat -L && echo FAIL | grep FAIL"
 
 # Report result
 # If any of the checks above exited with a non-zero exit code, the test will fail.
