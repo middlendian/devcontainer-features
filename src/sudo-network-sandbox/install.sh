@@ -6,8 +6,37 @@ log-queries
 log-facility=/var/log/dnsmasq.log
 server=1.1.1.1
 ipset=/captive.apple.com/allowed-domains
-ipset=/${ALLOWEDDOMAINS//,//}/allowed-domains
 EOF
+
+# Convert comma-separated domains to array
+IFS=',' read -ra DOMAINS_ARRAY <<< "$ALLOWEDDOMAINS"
+
+# Filter and clean domains
+VALID_DOMAINS=()
+for domain in "${DOMAINS_ARRAY[@]}"; do
+    # Trim whitespace
+    domain=$(echo "$domain" | xargs)
+
+    # Skip empty entries
+    [ -z "$domain" ] && continue
+
+    # Basic domain validation
+    if [[ "$domain" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$ ]]; then
+        VALID_DOMAINS+=("$domain")
+    else
+        echo "ERROR: invalid domain: $domain" >&2
+        exit 1
+    fi
+done
+
+# Add each valid domain
+if [ ${#VALID_DOMAINS[@]} -gt 0 ]; then
+    # Join array with slashes
+    IPSET_DOMAINS=$(IFS=/; echo "${VALID_DOMAINS[*]}")
+    echo "ipset=/${IPSET_DOMAINS}/allowed-domains" >> /etc/dnsmasq.conf
+    echo "Configured ${#VALID_DOMAINS[@]} allowed domain(s):"
+    printf '  %s\n' "${VALID_DOMAINS[@]}"
+fi
 
 cat << 'EOF' >> /usr/local/bin/init-firewall.sh
 #!/bin/bash
