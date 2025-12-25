@@ -1,6 +1,6 @@
 {
   "id": "sudo-network-sandbox",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "name": "Sudo & Network Sandbox",
   "description": "Blocks sudo commands and limits network egress to only the specified domains. Useful for isolating AI agents.",
   "options": {
