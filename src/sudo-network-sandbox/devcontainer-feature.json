@@ -1,0 +1,24 @@
+{
+  "id": "sudo-network-sandbox",
+  "version": "0.0.1",
+  "name": "Sudo & Network Sandbox",
+  "description": "Blocks sudo commands and limits network egress to only the specified domains. Useful for isolating AI agents.",
+  "options": {
+    "allowedDomains": {
+      "description": "List of permitted domains for egress traffic (comma-separated)",
+      "default": "",
+      "type": "string"
+    }
+  },
+  "capAdd": [
+    "NET_ADMIN",
+    "NET_RAW"
+  ],
+  "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
+  "dependsOn": {
+    "ghcr.io/rocker-org/devcontainer-features/apt-packages:1.0.2": {
+      "packages": "dnsmasq,iptables,ipset"
+    },
+    "ghcr.io/eitsupi/devcontainer-features/jq-likes:2": {}
+  }
+}

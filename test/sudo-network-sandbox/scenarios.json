@@ -1,0 +1,17 @@
+{
+  "net-reachability": {
+    "image": "mcr.microsoft.com/devcontainers/base:trixie",
+    "features": {
+      "sudo-network-sandbox": {
+        "allowedDomains": "httpbin.org"
+      }
+    }
+  },
+  "sudo-denied": {
+    "image": "mcr.microsoft.com/devcontainers/base:trixie",
+    "features": {
+      "sudo-network-sandbox": {
+      }
+    }
+  }
+}
