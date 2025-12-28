@@ -1,5 +1,30 @@
 #!/bin/bash
 
+set -e
+
+# Clean up apt lists to ensure we pull fresh update
+rm -rf /var/lib/apt/lists/*
+
+apt_get_update() {
+    if [ "$(find /var/lib/apt/lists/* | wc -l)" = "0" ]; then
+        echo "Running apt-get update..."
+        apt-get update -y
+    fi
+}
+
+# Checks if packages are installed and installs them if not
+ensure_packages_are_installed() {
+    if ! dpkg -s "$@" >/dev/null 2>&1; then
+        apt_get_update
+        DEBIAN_FRONTEND=noninteractive apt-get -y install --no-install-recommends "$@"
+    fi
+}
+
+ensure_packages_are_installed dnsmasq iptables ipset dnsutils
+
+# Clean up after ourselves
+rm -rf /var/lib/apt/lists/*
+
 cat << EOF > /etc/dnsmasq.conf
 listen-address=127.0.0.1
 log-queries
